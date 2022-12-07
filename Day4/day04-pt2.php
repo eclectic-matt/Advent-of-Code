@@ -30,8 +30,8 @@ if ($handle) {
 		//IF THERE ARE OVERLAPPING VALUES
 		if(count($matching) > 0){
 		
-				//INCREMENT TOTAL
-				$total++;
+			//INCREMENT TOTAL
+			$total++;
 		}
 	}
 
