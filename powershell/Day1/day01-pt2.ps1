@@ -28,6 +28,5 @@ for($i = 0; $i -lt $invCount; $i++){
 $elves = ($elves | Sort-Object -Descending);
 #SELECT THE FIRST 3 OBJECTS AND SUM
 $elves | Select-Object -First 3 | ForEach-Object {$total=0} {$total += $_};
-
-#PIPE THE ELVES ARRAY INTO THE MEASURE OBJECT CMD AND GET THE MAXIMUM VALUE
+#OUTPUT THIS TOTAL
 Write-Host (-join("Top 3 Elves' Calories: ",$total));
