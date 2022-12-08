@@ -1,7 +1,7 @@
 <?php
 
 //ADVENT OF CODE 2022
-//DAY 5
+//DAY 6 - MESSAGE ENCRYPTION - START_OF_MESSAGE
 
 //OPEN FILE HANDLE (READ)
 $handle = fopen("input.txt", "r");
