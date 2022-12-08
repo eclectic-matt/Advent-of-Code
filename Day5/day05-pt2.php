@@ -82,13 +82,17 @@ if ($handle) {
 			$moved = array();
 			//ONE AT A TIME UP TO THE COUNT...
 			for($i = 0; $i < $count; $i++){
+			
 				//GET THE MOVED ELEMENT (POP FROM END)
 				$moved[] = array_pop($stacks[$from]);
 			}
+
 			$moveCount = count($moved);
+			
 			//NOW ADD BACK IN REVERSE ORDER
 			for($i = 0; $i < $moveCount; $i++){
-				//PUSH THE MOVED ELEMENT ONTO ANOTHER STACK
+			
+				//PUSH ONTO THE DESTINATION IN REVERSE ORDER (count-1-$i)
 				array_push($stacks[$to],$moved[$moveCount - 1 - $i]);
 			}
 		}
