@@ -34,48 +34,10 @@ foreach($line in $content){
 	#IF THERE ARE OVERLAPPING VALUES
 	if($matching.length -gt 0){
 
-		#GET THE MIN AND THE MAX FROM THE MATCHING CHARS
-		$matchMin = [int]($matching | measure -Minimum).Minimum;
-		$matchMax = [int]($matching | measure -Maximum).Maximum;
-		#OUTPUT MIN & MAX
-		#Write-Host (-join("MIN: ",$matchMin," MAX: ",$matchMax));
-
-		#IS THE MATCH THE FIRST RESULT?
-		if( ($matchMin -eq $firstLower) -And ($matchMax -eq $firstUpper) ){
-			
-			#Write-Host (-join($firstHalf," is within ",$secondHalf)); 
-			#INCREMENT TOTAL
-			$total += 1;
-
-		#IS THE MATCH THE SECOND RESULT?
-		}elseif ( ($matchMin -eq $secondLower) -And ($matchMax -eq $secondUpper) ){
-			
-			#Write-Host (-join($secondHalf," is within ",$firstHalf)); 
-			#INCREMENT TOTAL
-			$total += 1;
-		}else{
-
-			#NO OVERLAP
-			#Write-Host (-join("NO OVERLAP: ",$line)); 
-		}
-
-		#Write-Host "============";
-
-	}else{
-
-		#NO OVERLAP
-		#Write-Host (-join("NO MATCHING: ",$line));
-		#Write-Host "============";
+		#INCREMENT TOTAL
+		$total += 1;
 	}
 }
 
 #OUTPUT ANSWER
 $total;
-
-$processed;
-
-<#
-	$myArray = [int[]]5,66,4,33,2,9,9,12
-	$minvalue=[int]($myArray | measure -Minimum).Minimum
-	$myArray.IndexOf($minvalue)
-#>
