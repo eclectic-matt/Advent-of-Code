@@ -1,4 +1,4 @@
-﻿<# POWERSHELL ADVENT OF CODE 2022 - DAY 4, PART 2 #>
+﻿<# POWERSHELL ADVENT OF CODE 2022 - DAY 4 #>
 
 #GET INPUT
 $file = "input.txt";
