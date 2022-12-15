@@ -33,38 +33,10 @@ if ($handle) {
 				case 'U':
 					$xDiff = 0;
 					$yDiff = 1;
-					/*
-					//CHANGE HEAD POSITION
-					$headPos = [$headPos[0], ($headPos[1] + 1)];
-					echo 'Head is now at: ' . implode(',',$headPos) . '<br>';
-					//CHECK FOR TAIL UPDATE (COMPARE X DISTANCE AND Y DISTANCE, IF EITHER > 1 THEN UPDATE)
-					if(max($headPos[0] - $tailPos[0], $headPos[1] - $tailPos[1]) > 1){
-						//CHANGE TAIL POSITION
-						$tailPos = [$tailPos[0], ($tailPos[1] + 1)];
-						echo 'TAIL MOVE - now at: ' . implode(',',$tailPos) . '<br>';
-						if(!in_array(implode(',',$tailPos),$visited)){
-							$visited[] = implode(',',$tailPos);
-							echo 'NEW TILE - Visited count is now: ' . count($visited) . '<br>';
-						}
-					}*/
 				break;
 				case 'D':
 					$xDiff = 0;
 					$yDiff = -1;
-					/*
-					//CHANGE HEAD POSITION
-					$headPos = [$headPos[0], ($headPos[1] - 1)];
-					echo 'Head is now at: ' . implode(',',$headPos) . '<br>';
-					//CHECK FOR TAIL UPDATE (COMPARE X DISTANCE AND Y DISTANCE, IF EITHER > 1 THEN UPDATE)
-					if(max($headPos[0] - $tailPos[0], $headPos[1] - $tailPos[1]) > 1){
-						//CHANGE TAIL POSITION
-						$tailPos = [$tailPos[0], ($tailPos[1] - 1)];
-						echo 'TAIL MOVE - now at: ' . implode(',',$tailPos) . '<br>';
-						if(!in_array(implode(',',$tailPos),$visited)){
-							$visited[] = implode(',',$tailPos);
-							echo 'NEW TILE - Visited count is now: ' . count($visited) . '<br>';
-						}
-					}*/
 				break;
 				case 'L':
 					$xDiff = -1;
@@ -130,31 +102,6 @@ if ($handle) {
 				echo '<em>TAIL HAS ALREADY VISITED THIS TILE</em><br>';
 			}
 			echo '<br>';
-
-			/*
-			//CHECK FOR TAIL UPDATE (COMPARE X DISTANCE AND Y DISTANCE, IF EITHER > 1 THEN UPDATE)
-			if(max(abs($headPos[0] - $tailPos[0]), abs($headPos[1] - $tailPos[1])) > 1){
-				
-				//THIS ONLY MOVES IN ONE DIRECTION (UP/DOWN/LEFT/RIGHT)
-				//THINK THIS *ALSO* NEEDS A DIAGONAL OPTION
-				
-				//CHANGE TAIL POSITION
-				$tailPos = [ ($tailPos[0] + $xDiff), ($tailPos[1] + $yDiff) ];
-				echo '<b>TAIL MOVE: ' . implode(',',$tailPos) . '</b><br>';
-				
-				//CHECK IF THIS TILE HAS BEEN VISITED BEFORE
-				if(!in_array(implode(',',$tailPos),$visited)){
-
-					$visited[] = implode(',',$tailPos);
-					echo '<b style="color: red;">NEW TILE - Visited count is now: ' . count($visited) . '</b><br>';
-				}else{
-					echo '<em>TAIL HAS ALREADY VISITED THIS TILE</em><br>';
-				}
-				echo '<br>';
-			}else{
-				echo '<em>TAIL STAY: ' . implode(',',$tailPos) . '</em><br>';
-			}
-			*/
 		}
 
 		echo '<hr>';
