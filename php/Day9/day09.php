@@ -71,7 +71,7 @@ if ($handle) {
 			}
 
 
-			//
+			//UPDATE TAIL POSITION
 			$tailPos = [ ($tailPos[0] + $xDiff), ($tailPos[1] + $yDiff) ];
 
 			//CHECK IF THIS TILE HAS BEEN VISITED BEFORE
@@ -83,4 +83,5 @@ if ($handle) {
 	}
 }
 
+//OUTPUT ANSWER
 echo '<h1>Total Unique Visited: ' . count(array_unique($visited)) . '</h1>';
