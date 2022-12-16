@@ -164,13 +164,21 @@ for($y = $minY; $y < $maxY; $y++){
 	//ITERATE COLUMNS
 	for($x = $minX; $x < $maxX; $x++){
 
-		echo '<td title="(' . $y . ', ' . $x . ')" onclick="highlight(' . $y . ', ' . $x . ')" class="row' . $y . ' col' . $x .'">';
 		
 		//HAS THIS CELL BEEN VISITED?
 		if(in_array($x . ',' . $y,$visited)){
-			
+
+			$visitNum = array_keys($visited, $x . ',' . $y)[0];
+			$percent = intval($visitNum) / count($visited);
+			$color = number_format(360 * $percent,0,'','');
+			$colorStr = 'hsl(' . $color . ', 100%, 50%)';
+			echo '<td style="background-color: ' . $colorStr . '" title="(' . $y . ', ' . $x . ')" onclick="highlight(' . $y . ', ' . $x . ')" class="row' . $y . ' col' . $x .'">';
+
 			//SHOW VISIT # IN THE TABLE CELL
-			echo array_keys($visited, $x . ',' . $y)[0];
+			echo $visitNum;
+		}else{
+
+			echo '<td title="(' . $y . ', ' . $x . ')" onclick="highlight(' . $y . ', ' . $x . ')" class="row' . $y . ' col' . $x .'">';
 		}
 		echo '</td>';
 		
