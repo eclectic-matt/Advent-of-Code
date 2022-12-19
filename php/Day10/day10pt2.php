@@ -26,13 +26,14 @@ if ($handle) {
 			case 'noop':
 				//INCREMENT CYCLE BY 1 (MOD 40)
 				$cycle = ($cycle + 1) % $lineLength;
-				//echo "ON CYCLE $cycle<br>";
-
+				
 				//IF THIS CYCLE IS WITHIN THE SPRITE WIDTH (+/- 1)
-				if(abs($x - $cycle) <= 1){
+				if(abs($x - $cycle + 1) <= 1){
+
 					//DRAW PIXEL
 					$display .= '#';
 				}else{
+
 					//DISPLAY BLANK
 					$display .= '.';
 				}
@@ -40,25 +41,28 @@ if ($handle) {
 			case 'addx':
 				//INCREMENT CYCLE BY 1 (MOD 40)
 				$cycle = ($cycle + 1) % $lineLength;
-				//echo "ON CYCLE $cycle<br>";
 
 				//IF THIS CYCLE IS WITHIN THE SPRITE WIDTH (+/- 1)
-				if(abs($x - $cycle) <= 1){
+				if(abs($x - $cycle + 1) <= 1){
+
 					//DRAW PIXEL
 					$display .= '#';
 				}else{
+
 					//DISPLAY BLANK
 					$display .= '.';
 				}
+
 				//INCREMENT CYCLE BY 1 (MOD 40)
 				$cycle = ($cycle + 1) % $lineLength;
-				//echo "ON CYCLE $cycle<br>";
 
 				//IF THIS CYCLE IS WITHIN THE SPRITE WIDTH (+/- 1)
-				if(abs($x - $cycle) <= 1){
+				if(abs($x - $cycle + 1) <= 1){
+
 					//DRAW PIXEL
 					$display .= '#';
 				}else{
+
 					//DISPLAY BLANK
 					$display .= '.';
 				}
