@@ -80,6 +80,9 @@ if ($handle) {
 	}
 }
 
+//OUTPUT TOTAL ITEMS
+echo '<h1>TOTAL INITIAL ITEMS = ' . $countItems . '</h1>';
+
 //WHILE WE ARE STILL PROCESSING 
 while ($round < $roundLimit){
 
@@ -87,47 +90,31 @@ while ($round < $roundLimit){
 	echo '<h2>ROUND ' . ($round + 1) . '</h2>';
 
 	//ITERATE MONKEYS TO PROCESS THEM
-	foreach($monkeys as $id => $monkey){
+	for($monkeyId = 0; $monkeyId < 8; $monkeyId++){
 
-		echo '<h3>PROCESS MONKEY ' . $id . ', ITEMS = ' . implode(",",$monkey['items']) . '</h3>';
+		//MAKE REFERENCE TO CURRENT MONKEY
+		$monkey = &$monkeys[$monkeyId];
+
+		echo '<h3>PROCESS MONKEY ' . $monkeyId . ', ITEMS = ' . implode(",",$monkey['items']) . '</h3>';
+		
 		//ITERATE THROUGH THE MONKEY'S ITEMS
 		foreach($monkey['items'] as $itemId => $item){
 
 			echo '<div style="border: 3px solid black; background-color: yellow;">PROCESSING ITEM ' . $itemId . ' = ' . $item . '<br>';
-			//PROCESS THIS ITEM
-			processItem($id, $item);
-
-			//REMOVE THIS ITEM
-			//unset($monkeys[$id]['items'][$itemId]);
-
-			//array_splice($monkeys[$id]['items'],$itemId,1);
-
-			/*$monkeys[$id]['items'] = array_filter($monkeys[$id]['items'], function($v){
-				//global $itemId;
-				//return $k !== $itemId;
-				global $item;
-				return $v !== $item;
-			});*/
-
-			/*$monkeys[$id]['items'] = array_filter($monkeys[$id]['items'], function($k){
-				global $itemId;
-				return $k != $itemId;
-			}, ARRAY_FILTER_USE_KEY);*/
-
-			//echo 'MONKEY ' . $id . ' NOW HAS ITEMS=' . implode(",",$monkey['items']) . '<br>';
+				//PROCESS THIS ITEM
+				processItem($monkeyId, $item);
 			echo '</div>';
-			//echo 'MONKEY ' . $id . ' NOW HAS ITEMS=' . implode(",",$monkey['items']) . '<br>';
 		}
 
 		//CLEAR MONKEY'S ITEMS
-		$monkeys[$id]['items'] = array();
-		echo 'MONKEY ' . $id . ' NOW HAS ITEMS=' . implode(",",$monkeys[$id]['items']) . '<br>';
+		$monkeys[$monkeyId]['items'] = array();
+		echo 'MONKEY ' . $monkeyId . ' NOW HAS ITEMS=' . implode(",",$monkeys[$monkeyId]['items']) . '<br>';
 	}
 
 	//INCREMENT ROUND
 	$round++;
 }
-echo '<h1>TOTAL INITIAL ITEMS = ' . $countItems . '</h1>';
+
 
 //OUTPUT ANSWER
 echo '<pre>';
@@ -138,6 +125,7 @@ echo '</pre>';
 //12876 too low
 //20022 too low
 //16442400 too high
+//61503 correct
 
 	/*
 	Monkey inspects an item with a worry level of 79.
@@ -211,7 +199,8 @@ function processItem($id, $item){
 		//GET THE "TRUE" MONKEY
 		$trueMonkey = $thisMonkey['trueThrow'];
 		//PUSH THE NEW ITEM ONTO THE TRUE MONKEY ITEMS
-		$monkeys[$trueMonkey]['items'][] = intval($newItem);
+		array_push($monkeys[$trueMonkey]['items'],$newItem);
+		//$monkeys[$trueMonkey]['items'][] = intval($newItem);
 		echo 'Current worry level IS divisible by ' . $thisMonkey['divisor'] . '<br>';
 		echo 'Item with worry level ' . $newItem . ' is thrown to monkey ' . $trueMonkey . '<br>';
 	}else{
@@ -219,7 +208,8 @@ function processItem($id, $item){
 		//GET THE "FALSE" MONKEY
 		$falseMonkey = $thisMonkey['falseThrow'];
 		//PUSH THE NEW ITEM ONTO THE FALSE MONKEY ITEMS
-		$monkeys[$falseMonkey]['items'][] = intval($newItem);
+		//$monkeys[$falseMonkey]['items'][] = intval($newItem);
+		array_push($monkeys[$falseMonkey]['items'],$newItem);
 		echo 'Current worry level is not divisible by ' . $thisMonkey['divisor'] . '<br>';
 		echo 'Item with worry level ' . $newItem . ' is thrown to monkey ' . $falseMonkey . '<br>';
 	}
