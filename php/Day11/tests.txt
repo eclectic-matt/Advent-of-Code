@@ -1,0 +1,35 @@
+https://en.wikipedia.org/wiki/Divisibility_rule
+
+---
+Test: divisible by 2
+The last digit is even (0, 2, 4, 6, or 8)
+---
+Test: divisible by 3
+Sum the digits. The result must be divisible by 3
+---
+Test: divisible by 5
+The last digit is 0 or 5
+---
+Test: divisible by 7
+Adding 5 times the last digit to the rest gives a multiple of 7
+(Works because 49 is divisible by 7)
+---
+Test: divisible by 11
+Subtract the last digit from the rest. The result must be divisible by 11.
+---
+Test: divisible by 13
+Add 4 times the last digit to the rest. The result must be divisible by 13.	
+---
+Test: divisible by 17
+Subtract 5 times the last digit from the rest. 
+(Works because 51 is divisible by 17.)
+---
+Test: divisible by 19
+Add 4 times the last two digits to the rest. 
+(Works because 399 is divisible by 19.)
+-------
+
+
+-------
+Divisble by 4:
+The last two digits form a number that is divisible by 4.[2][3]	
