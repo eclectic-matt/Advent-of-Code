@@ -13,10 +13,11 @@ $monkeys = array();
 $round = 0;
 //
 $roundLimit = 10000;
-$roundLimit = 1000;
-$roundBreak = 10;
+$roundBreak = 1000;
 $countItems = 0;
-
+//DEBUG
+$startTime = microtime(true);
+$initTime = microtime(true);
 
 if ($handle) {
 	//READ FILE LINE BY LINE
@@ -88,9 +89,20 @@ if ($handle) {
 $monkeyCount = $monkeyId + 1;
 echo 'MONKEY COUNT : ' . $monkeyCount . '<br>';
 
-//echo '<pre>';
-//var_dump($monkeys);
-//echo '</pre>';
+
+//RIGHT - THIS IS THE "TRICK" THAT ALLOWS THIS TO WORK
+//https://en.wikipedia.org/wiki/Chinese_remainder_theorem
+//BASICALLY, AS THESE VALUES SHARED DENOMINATORS (THEY EACH GET MULTIPLIED BY THE SAME NUMBERS)
+//THEN THE DIVISIBILITY RULES WILL WORK FOR *ANY* NUMBER WHICH IS RUN THROUGH 
+// $item =  $item % $superModulo
+//WHERE THE $superModulo IS THE PRODUCT OF ALL THE DIVISORS
+//IT'S AN ANNOYING HACK WHICH CAUGHT ME OUT FOR A WHILE!
+$superModulo = array_reduce($monkeys, function($prev, $current){
+	echo 'MULTIPLY BY ' . $current['divisor'] . '<br>';
+	return $current['divisor'] * $prev;
+}, 1);
+
+echo 'SUPER MODULO: ' . $superModulo . '<br>';
 
 //OUTPUT TOTAL ITEMS
 echo '<h1>TOTAL INITIAL ITEMS = ' . $countItems . '</h1>';
@@ -130,9 +142,13 @@ while ($round < $roundLimit){
 				break;
 			}
 
+			//REDUCE BY SUPER MODULO
+			$newItem = $newItem % $superModulo;
+
 			//RUN THE TEST USING THE DIVISOR METHOD
 			$result = (gmp_div_r($newItem, $monkeys[$monkeyId]['divisor'], GMP_ROUND_ZERO) == 0);
 			
+
 			if($result){
 
 				//GET THE "TRUE" MONKEY
@@ -155,31 +171,31 @@ while ($round < $roundLimit){
 		$monkeys[$monkeyId]['items'] = array();
 	}
 
+	//INCREMENT ROUND
+	$round++;
+
 	if(($round % $roundBreak) == 0){
 		echo '<h2>AFTER ROUND ' . $round . '</h2>';
+		echo '<em>Time Taken: ' . (microtime(true) - $startTime) . 's</em><br>';
+		//RESET START TIME
+		$startTime = microtime(true); 
 		foreach($monkeys as $id => $monkey){
 			echo 'Monkey ' . $id . ' inspected items ' . $monkey['inspects'] . ' times<br>'; 
 		}
 	}
-
-	//INCREMENT ROUND
-	$round++;
 }
 
 //OUTPUT FINALE
-echo '<h2>AFTER ROUND ' . $round . '</h2>';
+echo '<h2>AFTER ROUND ' . $round . '</h2>';	
+
+//OUTPUT TIME
+echo '<em>Time Taken: ' . (microtime(true) - $startTime) . 's</em><br>';
+//RESET START TIME
+$startTime = microtime(true);
+
 foreach($monkeys as $id => $monkey){
 	echo 'Monkey ' . $id . ' inspected items ' . $monkey['inspects'] . ' times<br>'; 
 }
-
-//OUTPUT ANSWER
-//echo '<pre>';
-//var_dump($monkeys);
-//echo '</pre>';
-
-///PART 2
-//18273065976 too high
-//18303264239 too high
 
 $inspects = array();
 $countItems = 0;
@@ -195,3 +211,4 @@ echo '<h1>TOTAL END ITEMS = ' . $countItems . '</h1>';
 //echo '<h1>MULTIPLY TOP 2 = ' . ($inspects[0] * $inspects[1]) . '</h1>';
 echo '<h1>TOP 2 = ' . $inspects[0] . ' AND ' . $inspects[1] . '</h1>';
 echo '<h1>MULTIPLY TOP 2 = ' . gmp_mul($inspects[0], $inspects[1]) . '</h1>';
+echo 'TOTAL TIME TAKEN: ' . (microtime(true) - $initTime) . 's<br>';
