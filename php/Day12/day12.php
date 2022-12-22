@@ -2,12 +2,17 @@
 
 //ADVENT OF CODE 2022 - DAY 12
 
+//http://localhost/Advent2022/php/Day12/Day12.php
+
 /*
 	NOTES:
 	https://medium.com/@nicholas.w.swift/easy-a-star-pathfinding-7e6689c7f7b2
 	https://github.com/Nexii-Malthus/phpPathfinding/blob/master/libPathfinding.php
 	https://stackoverflow.com/questions/4609028/simple-pathfinding-in-php
 	https://www.redblobgames.com/pathfinding/a-star/implementation.html#python-astar
+
+	https://web.archive.org/web/20171022224528/http://www.policyalmanac.org/games/aStarTutorial.htm
+	https://web.archive.org/web/20171019182159/http://www.policyalmanac.org/games/heuristics.htm
 */
 
 //OPEN FILE HANDLE (READ)
@@ -43,9 +48,14 @@ foreach($grid as $rowId => $row){
 	foreach($row as $colId => $col){
 		if($col === 'S'){
 			$path[] = array($rowId, $colId);
+			$startLocation = array($rowId, $colId);
+		}else if($col === 'E'){
+			$endLocation = array($rowId, $colId);
 		}
 	}
 };
+echo 'The Start Location is: ' . implode(',', $startLocation) . '<br>';
+echo 'The End Location is: ' . implode(',', $endLocation) . '<br>';
 
 //SET THE CURRENT ELEVATION (CELL SAYS "S" BUT THIS IS "a")
 $currentElevation = 'a';
@@ -55,41 +65,170 @@ echo 'The current coords are: (' .
 ') = ' . $grid[ $path[0][0] ][ $path[0][1] ] . '<br>';
 
 $round = 0;
-$roundLimit = 10000;
+$roundLimit = 1000;
 $currentLocation = array(20, 0);
 $previousLocation = array(20,0);
+
+echo '<ul>';
 
 while (
 	($currentElevation !== 'E') and
 	($round < $roundLimit)
 ){
 
+	//RUN "processMove" TO GET THE NEW CURRENT LOCATION
 	$currentLocation = processMove($currentLocation, $grid, $path);
+	
 	if($currentLocation === $previousLocation){
-		echo '<b>REVISITING A LOCATION - WORK BACK!</b><br>';
-		//REMOVE FROM PATH (TWICE)
+	
+		//echo '<b>REVISITING A LOCATION - WORK BACK!</b><br>';
+		//REMOVE FROM PATH
 		$deadEnd = array_pop($path);
 		$deadEnds[] = $deadEnd;
-		//array_pop($path);
 	}else{
-		echo '<b>NEW LOCATION - CONTINUE</b><br>';
+	
+		//echo '<b>NEW LOCATION - CONTINUE</b><br>';
 		$previousLocation = $currentLocation;
 	}
+	
 	$currentElevation = $grid[$currentLocation[0]][$currentLocation[1]];
-	echo '<h2>Current location is (' . $currentLocation[0] . ', ' . $currentLocation[1] . ') with elevation = ' . $currentElevation . '</h2>';
+	
+	/*echo '<li>ROUND ' . $round . 
+		' - Current location is (' . 
+			$currentLocation[0] . ', ' . $currentLocation[1] . 
+		') with elevation = ' . 
+		$currentElevation . '</li>';
+	*/
 	$round++;
 }
+echo '</ul>';
+
+$uniques = array();
+foreach($path as $uniqId => $loc){
+	$uniques[] = $loc[0] . ',' . $loc[1];
+	echo $uniqId . ' => (' . $loc[0] . ',' . $loc[1] . ')<br>';
+}
+$uniqPath = array_unique($uniques);
+
 
 if($grid[$currentLocation[0]][$currentLocation[1]] == 'E'){
-	echo '<h1>HOLY SHIT! REACHED THE CURRENT LOCATION!!!!</h1>';
+
+	echo '<h1>HOLY SHIT! REACHED THE END LOCATION!!!!</h1>';
+	echo '<b>PATH LENGTH: ' . count($path) . '</b><br>';
+	echo '<b>UNIQUE PATH LENGTH: ' . count($uniqPath) . '</b><br>';
+	//1525 too high (BRUTE FORCE)
 }
-/*
+
+foreach($uniqPath as $id => $unique){
+
+	echo '<h2>At path ' . $id . ' (' . $unique . ') we have:</h2>';
+	//$thisEl = explode(',',$unique);
+	//if(count($thisEl) === 2){
+		echo implode(' => ',array_slice($uniqPath,0,$id - 1,true)) . '<br>';
+		echo '<b>Distance from start: ' . calcDistance(array_slice($uniqPath,0,$id - 1,true)) . '</b><br>';
+		echo 'Heuristic: ' . calcHeuristic($unique, $endLocation);
+		echo '<br><hr><br>';
+	//}
+}
+
+function calcHeuristic($current, $end){
+
+	if(!is_array($current)){
+
+		//PROCESS STRING
+		echo '<em>Heuristic Calc on (' . 
+			substr($current,0,1) . ',' . substr($current,2,1) . 
+			') -> (' . 
+			$end[0] . ',' . $end[1] . 
+		')</em><br>';
+		
+		//THE "NON-DIAGONAL" VERSION (MANHATTAN METHOD)
+		return (abs($current[0] - $end[0]) + abs($current[2] - $end[1]));
+	}else{
+		//PROCESS ARRAY
+		echo '<em>Heuristic Calc on (' . 
+			$current[0] . ',' . $current[1] . 
+			') -> (' . 
+			$end[0] . ',' . $end[1] . 
+		')</em><br>';
+		
+		//THE "NON-DIAGONAL" VERSION (MANHATTAN METHOD)
+		return (abs($current[0] - $end[0]) + abs($current[1] - $end[1]));
+	}
+	
+}
+
+function calcDistance($currentPath){
+	
+	//REDUCE THE ARRAY BY SUMMING THE "H" VALUES ON THE CURRENT PATH
+	return array_reduce($currentPath, function($carry, $item){
+
+		global $endLocation;
+		//SUM THE CALCULATED HEURISTIC FOR EACH ITEM IN THE CURRENT PATH
+		$carry += calcHeuristic($item, $endLocation);
+	},0);
+}
+
+
+
+
 echo '<pre>';
-	var_dump($path);
+foreach($grid as $rowId => $row){
+	foreach($row as $colId => $col){
+		
+		if($grid[$rowId][$colId] === 'E'){
+
+			echo '<span style="color: red;">E</span>';
+
+		}else if ($grid[$rowId][$colId] === 'S'){
+
+			echo '<span style="color: red;">S</span>';
+
+		}else if(in_array(array($rowId, $colId), $path)){
+
+			//PRINT # OR _ DEPENDING ON VISITED
+			$curPath = array_search(array($rowId,$colId),$path);
+			if($curPath > 0){
+				//GET PREV
+				$prevPath = $path[$curPath - 1];
+			}
+			$curEl = $grid[$rowId][$colId];
+			$preEl = $grid[$prevPath[0]][$prevPath[1]];
+			$color = floor(0xfffff * (ord($curEl) / 255));
+			echo '<span style="background-color: #' . $color . '" title="(' . $rowId . ',' . $colId . ') = vist #' . $curPath . '">';
+			if($curEl > $preEl){
+				echo '^';
+			}else if ($curEl == $preEl){
+				echo '=';
+			}else{
+				echo 'V';
+			}
+			echo '</span>';
+			//echo '#';
+		}else{
+			echo '_';
+		}
+	}
+	//NEW ROW
+	echo '<br>';
+}
 echo '</pre>';
 
-die();
-*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function priority_add(&$queue, $item){
 	//CALCULATE HEURISTIC FOR ITEM
@@ -113,22 +252,22 @@ function processMove($current, $grid, &$path){
 		$diff = ord($adjacent) - ord($currentElevation);
 		//AS LONG AS THE ELEVATION IS LESS THAN 1
 		if($diff <= 1){
-			echo 'LEFT MOVE POSSIBLE<br>';
+			//echo 'LEFT MOVE POSSIBLE<br>';
 			$adjacentLocation = array($x, $y - 1);
 			if(in_array($adjacentLocation,$path)){
-				echo 'LEFT ALREADY VISITED - IGNORE<br>';
+				//echo 'LEFT ALREADY VISITED - IGNORE<br>';
 			}else if(in_array($adjacentLocation,$deadEnds)){
-				echo 'LEFT IS A DEAD END - IGNORE<br>';
+				//echo 'LEFT IS A DEAD END - IGNORE<br>';
 			}else{
-				echo 'ADDING LEFT TO PATH<br>';
+				//echo 'ADDING LEFT TO PATH<br>';
 				$path[] = $adjacentLocation;
 				return $path[count($path) - 1];
 			}
 		}else{
-			echo 'LEFT ELEVATION NOT POSSIBLE (' . ord($adjacent) . ')<br>';
+			//echo 'LEFT ELEVATION NOT POSSIBLE (' . ord($adjacent) . ')<br>';
 		}
 	}else{
-		echo 'NO LEFT CELL<br>';
+		//echo 'NO LEFT CELL<br>';
 	}
 
 	//CHECK RIGHT MOVE
@@ -138,22 +277,22 @@ function processMove($current, $grid, &$path){
 		$diff = ord($adjacent) - ord($currentElevation);
 		//AS LONG AS THE ELEVATION IS LESS THAN 1
 		if($diff <= 1){
-			echo 'RIGHT MOVE POSSIBLE<br>';
+			//echo 'RIGHT MOVE POSSIBLE<br>';
 			$adjacentLocation = array($x, $y + 1);
 			if(in_array($adjacentLocation,$path)){
-				echo 'RIGHT ALREADY VISITED - IGNORE<br>';
+				//echo 'RIGHT ALREADY VISITED - IGNORE<br>';
 			}else if(in_array($adjacentLocation,$deadEnds)){
-				echo 'RIGHT IS A DEAD END - IGNORE<br>';
+				//echo 'RIGHT IS A DEAD END - IGNORE<br>';
 			}else{
-				echo 'ADDING RIGHT TO PATH<br>';
+				//echo 'ADDING RIGHT TO PATH<br>';
 				$path[] = $adjacentLocation;
 				return $path[count($path) - 1];
 			}
 		}else{
-			echo 'RIGHT ELEVATION NOT POSSIBLE (' . ord($adjacent) . ')<br>';
+			//echo 'RIGHT ELEVATION NOT POSSIBLE (' . ord($adjacent) . ')<br>';
 		}
 	}else{
-		echo 'NO RIGHT CELL<br>';
+		//echo 'NO RIGHT CELL<br>';
 	}
 	
 	//CHECK UP MOVE
@@ -161,26 +300,26 @@ function processMove($current, $grid, &$path){
 		//UP GRID CELL EXISTS
 		$adjacent = $grid[$x - 1][$y];
 		$diff = ord($adjacent) - ord($currentElevation);
-		echo '<em>Check up - elevation=' . $adjacent . ' so diff=' . $diff . '</em><br>';
+		//echo '<em>Check up - elevation=' . $adjacent . ' so diff=' . $diff . '</em><br>';
 
 		//AS LONG AS THE ELEVATION IS LESS THAN 1
 		if($diff <= 1){
-			echo 'UP MOVE POSSIBLE<br>';
+			//echo 'UP MOVE POSSIBLE<br>';
 			$adjacentLocation = array($x - 1, $y);
 			if(in_array($adjacentLocation,$path)){
-				echo 'UP ALREADY VISITED - IGNORE<br>';
+				//echo 'UP ALREADY VISITED - IGNORE<br>';
 			}else if(in_array($adjacentLocation,$deadEnds)){
-				echo 'UP IS A DEAD END - IGNORE<br>';
+				//echo 'UP IS A DEAD END - IGNORE<br>';
 			}else{
-				echo 'ADDING UP TO PATH<br>';
+				//echo 'ADDING UP TO PATH<br>';
 				$path[] = array($x - 1, $y);
 				return $path[count($path) - 1];
 			}
 		}else{
-			echo 'UP ELEVATION NOT POSSIBLE (' . ord($adjacent) . ')<br>';
+			//echo 'UP ELEVATION NOT POSSIBLE (' . ord($adjacent) . ')<br>';
 		}
 	}else{
-		echo 'NO UP CELL<br>';
+		//echo 'NO UP CELL<br>';
 	}
 	
 	//CHECK DOWN MOVE
@@ -188,26 +327,26 @@ function processMove($current, $grid, &$path){
 		//DOWN GRID CELL EXISTS
 		$adjacent = $grid[$x + 1][$y];
 		$diff = ord($adjacent) - ord($currentElevation);
-		echo '<em>Check down - elevation=' . $adjacent . ' so diff=' . $diff . '</em><br>';
+		//echo '<em>Check down - elevation=' . $adjacent . ' so diff=' . $diff . '</em><br>';
 		
 		//AS LONG AS THE ELEVATION IS LESS THAN 1
 		if($diff <= 1){
-			echo 'DOWN MOVE POSSIBLE<br>';
+			//echo 'DOWN MOVE POSSIBLE<br>';
 			$adjacentLocation = array($x + 1, $y);
 			if(in_array($adjacentLocation,$path)){
-				echo 'DOWN ALREADY VISITED - IGNORE<br>';
+				//echo 'DOWN ALREADY VISITED - IGNORE<br>';
 			}else if(in_array($adjacentLocation,$deadEnds)){
-				echo 'DOWN IS A DEAD END - IGNORE<br>';
+				//echo 'DOWN IS A DEAD END - IGNORE<br>';
 			}else{
-				echo 'ADDING DOWN TO PATH<br>';
+				//echo 'ADDING DOWN TO PATH<br>';
 				$path[] = $adjacentLocation;
 				return $path[count($path) - 1];
 			}
 		}else{
-			echo 'DOWN ELEVATION NOT POSSIBLE (' . ord($adjacent) . ')<br>';
+			//echo 'DOWN ELEVATION NOT POSSIBLE (' . ord($adjacent) . ')<br>';
 		}
 	}else{
-		echo 'NO DOWN CELL<br>';
+		//echo 'NO DOWN CELL<br>';
 	}
 
 	//RETURN THE LAST PATH LOCATION
@@ -215,27 +354,6 @@ function processMove($current, $grid, &$path){
 }
 
 
-echo '<ul>';
-foreach($path as $id => $location){
-	echo '<li>Visit ' . $id . ' = (' . $location[0] . ', ' . $location[1] . ')</li>';
-}
-echo '</ul>';
-
-
-echo '<pre>';
-foreach($grid as $rowId => $row){
-	foreach($row as $colId => $col){
-		//PRINT # OR _ DEPENDING ON VISITED
-		if(in_array(array($rowId, $colId), $path)){
-			echo '#';
-		}else{
-			echo '_';
-		}
-	}
-	//NEW ROW
-	echo '<br>';
-};
-echo '</pre>';
 
 die();
 /*
