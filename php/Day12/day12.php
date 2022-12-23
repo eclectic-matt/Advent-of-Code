@@ -15,6 +15,16 @@
 	https://web.archive.org/web/20171019182159/http://www.policyalmanac.org/games/heuristics.htm
 */
 
+
+
+//ARRAY TEST
+/*
+$arr = array(0, 1, 2, 3, 4, 5, 6);
+array_splice($arr, 2,0,9);
+var_dump($arr);
+die();
+*/
+
 //OPEN FILE HANDLE (READ)
 $handle = fopen("input.txt", "r");
 
@@ -38,14 +48,8 @@ $previousLocation = array(20,0);
 //PREPARE START/END LOCATION
 $startLocation = null;
 $endLocation = null;
-
-/*
-//CHECKING ORD VALUES (S and E will count as "lower" elevation)
-$letters = array('a', 'b', 'A', 'E', 'Z');
-foreach($letters as $letter){
-	echo 'Letter ' . $letter . ' => ' . ord($letter) . '<br>';
-}
-*/
+//SET THE CURRENT ELEVATION (CELL SAYS "S" BUT THIS IS "a")
+$currentElevation = 'a';
 
 //BUILD THE GRID (2D ARRAY)
 if ($handle) {
@@ -56,11 +60,21 @@ if ($handle) {
 		$grid[$row] = array_filter(str_split($line),function($v){
 			return $v !== "\n";
 		});
+
+		/*
+		//CONVERT INTO NODES?
+		foreach($grid[$row] as $col => $cell){
+			$node = new Node($row, $col, 1, 0, 0);
+			$grid[$row] = $node;
+		}
+		*/
+
 		//INCREMENT ROW
 		$row++;
 	}
 }
 
+//---
 
 //FIND STARTING/ENDING LOCATION
 foreach($grid as $rowId => $row){
@@ -72,104 +86,78 @@ foreach($grid as $rowId => $row){
 			$endLocation = array($rowId, $colId);
 		}
 	}
-};
+}
 echo 'The Start Location is: ' . implode(',', $startLocation) . '<br>';
 echo 'The End Location is: ' . implode(',', $endLocation) . '<br>';
 
-//SET THE CURRENT ELEVATION (CELL SAYS "S" BUT THIS IS "a")
-$currentElevation = 'a';
-echo 'Current elevation is: ' . $currentElevation . '<br>';
-echo 'The current coords are: (' . 
-	$path[0][0] . ', ' . $path[0][1] . 
-') = ' . $grid[ $path[0][0] ][ $path[0][1] ] . '<br>';
-
-
-echo '<ul>';
+//---
 
 while (
 	($currentElevation !== 'E') and
 	($round < $roundLimit)
 ){
-
 	//RUN "processMove" TO GET THE NEW CURRENT LOCATION
 	$currentLocation = processMove($currentLocation, $grid, $path);
 	
 	if($currentLocation === $previousLocation){
 	
-		//echo '<b>REVISITING A LOCATION - WORK BACK!</b><br>';
 		//REMOVE FROM PATH
 		$deadEnd = array_pop($path);
 		$deadEnds[] = $deadEnd;
 	}else{
-	
-		//echo '<b>NEW LOCATION - CONTINUE</b><br>';
+		
+		//STORE THE PREVIOUS LOCATION
 		$previousLocation = $currentLocation;
 	}
 	
+	//GET THE CURRENT ELEVATION (COULD NOW BE "E")
 	$currentElevation = $grid[$currentLocation[0]][$currentLocation[1]];
 	
-	/*echo '<li>ROUND ' . $round . 
-		' - Current location is (' . 
-			$currentLocation[0] . ', ' . $currentLocation[1] . 
-		') with elevation = ' . 
-		$currentElevation . '</li>';
-	*/
+	//INCREMENT ROUND
 	$round++;
 }
-echo '</ul>';
 
-$uniques = array();
-foreach($path as $uniqId => $loc){
-	$uniques[] = $loc[0] . ',' . $loc[1];
-	//OUTPUT PATH
-	//echo $uniqId . ' => (' . $loc[0] . ',' . $loc[1] . ')<br>';
-}
-$uniqPath = array_unique($uniques);
-
+//---
 
 if($grid[$currentLocation[0]][$currentLocation[1]] == 'E'){
 
 	echo '<h1>HOLY SHIT! REACHED THE END LOCATION!!!!</h1>';
 	echo '<b>PATH LENGTH: ' . count($path) . '</b><br>';
-	echo '<b>UNIQUE PATH LENGTH: ' . count($uniqPath) . '</b><br>';
 	//1525 too high (BRUTE FORCE)
 }
 
-/*
-foreach($uniqPath as $id => $unique){
+//OUTPUT GRID TO SCREEN
+outputGrid($grid, $path);
 
-	echo '<h2>At path ' . $id . ' (' . $unique . ') we have:</h2>';
-	//$thisEl = explode(',',$unique);
-	//if(count($thisEl) === 2){
-		echo implode(' => ',array_slice($uniqPath,0,$id - 1,true)) . '<br>';
-		echo '<b>Distance from start: ' . calcDistance(array_slice($uniqPath,0,$id - 1,true)) . '</b><br>';
-		echo 'Heuristic: ' . calcHeuristic($unique, $endLocation);
-		echo '<br><hr><br>';
-	//}
+//OUTPUT PATH INFO
+foreach($path as $id => $location){
+
+	echo '<h2>At path ' . $id . ' (' . implode(', ',$location) . ') we have:</h2>';
+	//echo '<b>Distance from start: ' . calcDistance(array_slice($path,0,$id - 1,true)) . '</b><br>';
+	
+	$startDistance = calcDistance(array_slice($path,0,$id,true));
+	$heuristic = calcHeuristic($location, $endLocation);
+	echo 'Distance from start: ' . $startDistance . '<br>';
+	echo 'Heuristic: ' . $heuristic . '<br>';
+	echo '<b>TOTAL COST: ' . ($heuristic + $startDistance) . '</b>';
+	echo '<br><hr><br>';
 }
-*/
+
+
+
+
+//=====================
+//UTILITIES
+//=====================
 
 function calcHeuristic($current, $end){
 
 	if(!is_array($current)){
 
-		//PROCESS STRING
-		echo '<em>Heuristic Calc on (' . 
-			substr($current,0,1) . ',' . substr($current,2,1) . 
-			') -> (' . 
-			$end[0] . ',' . $end[1] . 
-		')</em><br>';
-		
 		//THE "NON-DIAGONAL" VERSION (MANHATTAN METHOD)
 		return (abs($current[0] - $end[0]) + abs($current[2] - $end[1]));
 	}else{
-		//PROCESS ARRAY
-		echo '<em>Heuristic Calc on (' . 
-			$current[0] . ',' . $current[1] . 
-			') -> (' . 
-			$end[0] . ',' . $end[1] . 
-		')</em><br>';
-		
+
 		//THE "NON-DIAGONAL" VERSION (MANHATTAN METHOD)
 		return (abs($current[0] - $end[0]) + abs($current[1] - $end[1]));
 	}
@@ -177,6 +165,11 @@ function calcHeuristic($current, $end){
 
 function calcDistance($currentPath){
 	
+	//RETURN THE LENGTH OF THE CURRENT PATH?
+	return count($currentPath);
+
+	//----
+
 	//REDUCE THE ARRAY BY SUMMING THE "H" VALUES ON THE CURRENT PATH
 	return array_reduce($currentPath, function($carry, $item){
 
@@ -186,51 +179,53 @@ function calcDistance($currentPath){
 	},0);
 }
 
+/**
+ * Output the grid to the screen.
+ */
+function outputGrid($grid, $path){
 
+	echo '<pre>';
+	foreach($grid as $rowId => $row){
+		foreach($row as $colId => $col){
+			
+			if($grid[$rowId][$colId] === 'E'){
 
+				echo '<span style="color: red;">E</span>';
 
-echo '<pre>';
-foreach($grid as $rowId => $row){
-	foreach($row as $colId => $col){
-		
-		if($grid[$rowId][$colId] === 'E'){
+			}else if ($grid[$rowId][$colId] === 'S'){
 
-			echo '<span style="color: red;">E</span>';
+				echo '<span style="color: red;">S</span>';
 
-		}else if ($grid[$rowId][$colId] === 'S'){
+			}else if(in_array(array($rowId, $colId), $path)){
 
-			echo '<span style="color: red;">S</span>';
-
-		}else if(in_array(array($rowId, $colId), $path)){
-
-			//PRINT # OR _ DEPENDING ON VISITED
-			$curPath = array_search(array($rowId,$colId),$path);
-			if($curPath > 0){
-				//GET PREV
-				$prevPath = $path[$curPath - 1];
-			}
-			$curEl = $grid[$rowId][$colId];
-			$preEl = $grid[$prevPath[0]][$prevPath[1]];
-			$color = floor(0xfffff * (ord($curEl) / 255));
-			echo '<span style="background-color: #' . $color . '" title="(' . $rowId . ',' . $colId . ') = vist #' . $curPath . '">';
-			if($curEl > $preEl){
-				echo '^';
-			}else if ($curEl == $preEl){
-				echo '=';
+				//PRINT # OR _ DEPENDING ON VISITED
+				$curPath = array_search(array($rowId,$colId),$path);
+				if($curPath > 0){
+					//GET PREV
+					$prevPath = $path[$curPath - 1];
+				}
+				$curEl = $grid[$rowId][$colId];
+				$preEl = $grid[$prevPath[0]][$prevPath[1]];
+				$color = floor(0xfffff * (ord($curEl) / 255));
+				echo '<span style="background-color: #' . $color . '" title="(' . $rowId . ',' . $colId . ') = vist #' . $curPath . '">';
+				if($curEl > $preEl){
+					echo '^';
+				}else if ($curEl == $preEl){
+					echo '=';
+				}else{
+					echo 'V';
+				}
+				echo '</span>';
+				//echo '#';
 			}else{
-				echo 'V';
+				echo '_';
 			}
-			echo '</span>';
-			//echo '#';
-		}else{
-			echo '_';
 		}
+		//NEW ROW
+		echo '<br>';
 	}
-	//NEW ROW
-	echo '<br>';
+	echo '</pre>';
 }
-echo '</pre>';
-
 
 
 
@@ -406,10 +401,6 @@ echo '<pre>';
 echo '</pre>';
 die();
 
-function heuristic($start, $current){
-	return ( abs($a[0] - $b[0]) + abs($a[1] - $b[1]) );
-}
-
 function aStarSearch($grid, $start, $goal){
 	
 	//INIT LISTS
@@ -437,22 +428,86 @@ function priority($a, $b){
 }
 
 class Node{
-	public int $f;	//the total cost of the node
+
+	public int $f;	//the total cost of the node ($g + $h)
 	public int $g;	//the distance from current -> start node
 	public int $h;	//the heuristic (estimate from current -> end node)
 	public int $x;	//the x position
 	public int $y;	//the y position
 	public int $w;	//the weight
 
-	public function __construct($x, $y, $w){
+	/**
+	 * Construct a new node.
+	 * @param int $x The x position of the node.
+	 * @param int $y The y position of the node.
+	 * @param int $w The weight to travel to this node.
+	 * @param int $prevCost The cost to get up to this node.
+	 * @param \Node $end The end location node (for heuristic calc).
+	 * @return void No output.
+	*/
+	public function __construct($x, $y){ // $w, $prevCost, $end){
+
+		//STORE THE X-POS, Y-POS, AND CURRENT WEIGHT (DISTANCE TO PREV)
 		$this->x = $x;
 		$this->y = $y;
-		$this->w = $w;
+		//$this->w = $w;
+		//THE NEW DISTANCE ADDS THE CURRENT WEIGHT
+		//$this->g = $prevCost + $this->w;
+		//CALCULATE "H" (AND THEREFORE "F")
+		//$this->calcHeuristic($end);
+	}
+
+	/**
+	 * Calculate the heuristic (estimated cost to move to the end) for this node.
+	 * @param \Node $end The end node.
+	 * @return The calculated heuristic.
+	 */
+	public function calcHeuristic($end){
+		
+		//RECALC HEURISTIC
+		$this->h = (abs($this->x - $end[0]) + abs($this->y - $end[1]));
+		//RECALC TOTAL COST
+		$this->f = $this->g + $this->h;
+		//RETURN THE CALC
+		return $this->h;
+	}
+
+	/**
+	 * Gets the cost to travel to this node.
+	 * @return $int The cost.
+	 */
+	public function getCost(){
+
+		//RETURN VALUE
+		return $this->f;
 	}
 }
 
+
 class PQueue {
+
 	public $queue;
+
+	public function __construct(){
+		$this->queue = array();
+	}
+
+	public function put($item){
+		array_push($this->queue,$item);
+	}
+
+	public function get(){
+
+		$minH = 10000000;
+		$return = $this->queue[0];
+		foreach($this->queue as $item){
+			if($item->getCost() < $minH){
+				$minH = $item->f;
+				$return = $item;
+			}
+		}
+		return $return;
+	}
 
 }
 /*
