@@ -29,6 +29,24 @@ $deadEnds = array();
 $grid = array();
 $row = 0;
 
+//INIT ROUND AND ROUND LIMIT
+$round = 0;
+$roundLimit = 10000;
+//INIT START/END LOCATION (CALCULATED LATER)
+$currentLocation = array(20, 0);
+$previousLocation = array(20,0);
+//PREPARE START/END LOCATION
+$startLocation = null;
+$endLocation = null;
+
+/*
+//CHECKING ORD VALUES (S and E will count as "lower" elevation)
+$letters = array('a', 'b', 'A', 'E', 'Z');
+foreach($letters as $letter){
+	echo 'Letter ' . $letter . ' => ' . ord($letter) . '<br>';
+}
+*/
+
 //BUILD THE GRID (2D ARRAY)
 if ($handle) {
 	//READ FILE LINE BY LINE
@@ -43,7 +61,8 @@ if ($handle) {
 	}
 }
 
-//FIND STARTING COORDINATES
+
+//FIND STARTING/ENDING LOCATION
 foreach($grid as $rowId => $row){
 	foreach($row as $colId => $col){
 		if($col === 'S'){
@@ -64,10 +83,6 @@ echo 'The current coords are: (' .
 	$path[0][0] . ', ' . $path[0][1] . 
 ') = ' . $grid[ $path[0][0] ][ $path[0][1] ] . '<br>';
 
-$round = 0;
-$roundLimit = 1000;
-$currentLocation = array(20, 0);
-$previousLocation = array(20,0);
 
 echo '<ul>';
 
@@ -106,7 +121,8 @@ echo '</ul>';
 $uniques = array();
 foreach($path as $uniqId => $loc){
 	$uniques[] = $loc[0] . ',' . $loc[1];
-	echo $uniqId . ' => (' . $loc[0] . ',' . $loc[1] . ')<br>';
+	//OUTPUT PATH
+	//echo $uniqId . ' => (' . $loc[0] . ',' . $loc[1] . ')<br>';
 }
 $uniqPath = array_unique($uniques);
 
@@ -119,6 +135,7 @@ if($grid[$currentLocation[0]][$currentLocation[1]] == 'E'){
 	//1525 too high (BRUTE FORCE)
 }
 
+/*
 foreach($uniqPath as $id => $unique){
 
 	echo '<h2>At path ' . $id . ' (' . $unique . ') we have:</h2>';
@@ -130,6 +147,7 @@ foreach($uniqPath as $id => $unique){
 		echo '<br><hr><br>';
 	//}
 }
+*/
 
 function calcHeuristic($current, $end){
 
@@ -155,7 +173,6 @@ function calcHeuristic($current, $end){
 		//THE "NON-DIAGONAL" VERSION (MANHATTAN METHOD)
 		return (abs($current[0] - $end[0]) + abs($current[1] - $end[1]));
 	}
-	
 }
 
 function calcDistance($currentPath){
