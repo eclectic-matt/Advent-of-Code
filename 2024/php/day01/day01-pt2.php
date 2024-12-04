@@ -15,16 +15,20 @@ $lists = explode("\n", $input);
 foreach($lists as $listItem){
 	$locations = explode('   ', $listItem);
 	$leftList[] = $locations[0];
-	$rightList[] = $locations[1];
+	$rightList[] = trim($locations[1]);	//TRIM NEEDED AS EXTRA SPACES/NEW LINES WERE INCLUDED
 }
 //SORT EACH LIST NUMERICALLY
 //sort($leftList, SORT_NUMERIC);
 //sort($rightList, SORT_NUMERIC);
 
+echo '<pre>';
+var_dump($rightList);
+echo '</pre>';
+
 $rightCounts = array_count_values($rightList);
 //sort($rightCounts, SORT_NUMERIC);
-ksort($rightCounts, SORT_NUMERIC);
-var_dump($rightCounts);
+//ksort($rightCounts, SORT_NUMERIC);
+//var_dump($rightCounts);
 
 //INIT THE SIMILARITY SCORE
 $similarity = 0;
@@ -32,7 +36,8 @@ $similarity = 0;
 //ITERATE THROUGH THE SORTED LISTS BY INDEX
 for($i = 0; $i < count($leftList); $i++){
 	
-	$currentVal = intval($leftList[$i]);
+	//$currentVal = intval($leftList[$i]);
+	$currentVal = $leftList[$i];
 	echo 'CHECKING RIGHT LIST FOR "' . $currentVal . '"';
 	if(array_key_exists($currentVal, $rightCounts)){
 		$rightCount = $rightCounts[$currentVal];
@@ -47,3 +52,4 @@ for($i = 0; $i < count($leftList); $i++){
 }
 
 echo $similarity;
+//25358365
