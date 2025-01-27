@@ -2,11 +2,33 @@
 
 //TAKE INPUT (REMEMBER TO SAVE THE FILE, RATHER THAN COPY-PASTE LIKE AN EEJIT)
 $input = file_get_contents("input.txt");
-
+//$lines = explode('\n',$input);
 $total = 0;
+$mulEnabled = true;
+$currentStartIndex = 0;
+$currentEndIndex = 0;
+for($i = 0; $i < strlen($input); $i++){
+	$currentEndIndex = $i;
+	$currentWord = substr($input, $currentStartIndex, $currentEndIndex);
+	
+	if(stripos($currentWord, 'don\'t')){
+		//SET ENABLED FLAG TO FALSE 
+		$mulEnabled = false;
+	}else if(stripos($currentWord, 'do()')){
+
+	}
+}
+
+
+/*
+foreach($lines as $line){
+	echo $line . '<br><hr>';
+}
 
 $splitByDont = explode('don\'t', $input);
+echo '<pre>';
 var_dump($splitByDont);
+echo '</pre>';
 
 $mulEnabled = true;
 foreach($splitByDont as $index => $part){
